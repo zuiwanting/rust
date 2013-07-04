@@ -274,9 +274,7 @@ pub mod llvm {
     #[abi = "cdecl"]
     pub extern {
         /* Create and destroy contexts. */
-        #[fast_ffi]
         pub unsafe fn LLVMContextCreate() -> ContextRef;
-        #[fast_ffi]
         pub unsafe fn LLVMContextDispose(C: ContextRef);
         #[fast_ffi]
         pub unsafe fn LLVMGetMDKindIDInContext(C: ContextRef,
@@ -285,13 +283,11 @@ pub mod llvm {
                                         -> c_uint;
 
         /* Create and destroy modules. */
-        #[fast_ffi]
         pub unsafe fn LLVMModuleCreateWithNameInContext(ModuleID: *c_char,
                                                     C: ContextRef)
                                                  -> ModuleRef;
         #[fast_ffi]
         pub unsafe fn LLVMGetModuleContext(M: ModuleRef) -> ContextRef;
-        #[fast_ffi]
         pub unsafe fn LLVMDisposeModule(M: ModuleRef);
 
         /** Data layout. See Module::getDataLayout. */
@@ -307,7 +303,6 @@ pub mod llvm {
         pub unsafe fn LLVMSetTarget(M: ModuleRef, Triple: *c_char);
 
         /** See Module::dump. */
-        #[fast_ffi]
         pub unsafe fn LLVMDumpModule(M: ModuleRef);
 
         /** See Module::setModuleInlineAsm. */
@@ -1598,7 +1593,6 @@ pub mod llvm {
         pub unsafe fn LLVMIsATerminatorInst(Inst: ValueRef) -> ValueRef;
 
         /** Writes a module to the specified path. Returns 0 on success. */
-        #[fast_ffi]
         pub unsafe fn LLVMWriteBitcodeToFile(M: ModuleRef,
                                              Path: *c_char) -> c_int;
 
@@ -1648,40 +1642,30 @@ pub mod llvm {
         pub unsafe fn LLVMDisposeTargetData(TD: TargetDataRef);
 
         /** Creates a pass manager. */
-        #[fast_ffi]
         pub unsafe fn LLVMCreatePassManager() -> PassManagerRef;
         /** Creates a function-by-function pass manager */
-        #[fast_ffi]
         pub unsafe fn LLVMCreateFunctionPassManagerForModule(M:ModuleRef) -> PassManagerRef;
 
         /** Disposes a pass manager. */
-        #[fast_ffi]
         pub unsafe fn LLVMDisposePassManager(PM: PassManagerRef);
 
         /** Runs a pass manager on a module. */
-        #[fast_ffi]
         pub unsafe fn LLVMRunPassManager(PM: PassManagerRef,
                                          M: ModuleRef) -> Bool;
 
         /** Runs the function passes on the provided function. */
-        #[fast_ffi]
         pub unsafe fn LLVMRunFunctionPassManager(FPM:PassManagerRef, F:ValueRef) -> Bool;
 
         /** Initializes all the function passes scheduled in the manager */
-        #[fast_ffi]
         pub unsafe fn LLVMInitializeFunctionPassManager(FPM:PassManagerRef) -> Bool;
 
         /** Finalizes all the function passes scheduled in the manager */
-        #[fast_ffi]
         pub unsafe fn LLVMFinalizeFunctionPassManager(FPM:PassManagerRef) -> Bool;
 
-        #[fast_ffi]
         pub unsafe fn LLVMInitializePasses();
 
-        #[fast_ffi]
         pub unsafe fn LLVMAddPass(PM:PassManagerRef,P:PassRef);
 
-        #[fast_ffi]
         pub unsafe fn LLVMCreatePass(PassName:*c_char) -> PassRef;
 
         #[fast_ffi]
@@ -1763,9 +1747,7 @@ pub mod llvm {
         #[fast_ffi]
         pub unsafe fn LLVMAddBasicAliasAnalysisPass(PM: PassManagerRef);
 
-        #[fast_ffi]
         pub unsafe fn LLVMPassManagerBuilderCreate() -> PassManagerBuilderRef;
-        #[fast_ffi]
         pub unsafe fn LLVMPassManagerBuilderDispose(PMB:
                                                     PassManagerBuilderRef);
         #[fast_ffi]
@@ -1802,11 +1784,9 @@ pub mod llvm {
         /* Stuff that's in rustllvm/ because it's not upstream yet. */
 
         /** Opens an object file. */
-        #[fast_ffi]
         pub unsafe fn LLVMCreateObjectFile(MemBuf: MemoryBufferRef)
                                         -> ObjectFileRef;
         /** Closes an object file. */
-        #[fast_ffi]
         pub unsafe fn LLVMDisposeObjectFile(ObjFile: ObjectFileRef);
 
         /** Enumerates the sections in an object file. */
@@ -1814,7 +1794,7 @@ pub mod llvm {
         pub unsafe fn LLVMGetSections(ObjFile: ObjectFileRef)
                                    -> SectionIteratorRef;
         /** Destroys a section iterator. */
-        #[fast_ffi]
+
         pub unsafe fn LLVMDisposeSectionIterator(SI: SectionIteratorRef);
         /** Returns true if the section iterator is at the end of the section
             list: */
@@ -1843,7 +1823,6 @@ pub mod llvm {
                 Path: *c_char)
              -> MemoryBufferRef;
 
-        #[fast_ffi]
         pub unsafe fn LLVMRustWriteOutputFile(PM: PassManagerRef,
                                               M: ModuleRef,
                                               Triple: *c_char,
@@ -1894,11 +1873,9 @@ pub mod llvm {
                                                  Output: *c_char);
 
         /** Turn on LLVM pass-timing. */
-        #[fast_ffi]
         pub unsafe fn LLVMRustEnableTimePasses();
 
         /// Print the pass timings since static dtors aren't picking them up.
-        #[fast_ffi]
         pub unsafe fn LLVMRustPrintPassTimings();
 
         #[fast_ffi]
