@@ -59,35 +59,35 @@ pub enum Linkage {
 }
 
 pub enum Attribute {
-    ZExtAttribute = 1,
-    SExtAttribute = 2,
-    NoReturnAttribute = 4,
-    InRegAttribute = 8,
-    StructRetAttribute = 16,
-    NoUnwindAttribute = 32,
-    NoAliasAttribute = 64,
-    ByValAttribute = 128,
-    NestAttribute = 256,
-    ReadNoneAttribute = 512,
-    ReadOnlyAttribute = 1024,
-    NoInlineAttribute = 2048,
-    AlwaysInlineAttribute = 4096,
-    OptimizeForSizeAttribute = 8192,
-    StackProtectAttribute = 16384,
-    StackProtectReqAttribute = 32768,
-    // 31 << 16
-    AlignmentAttribute = 2031616,
-    NoCaptureAttribute = 2097152,
-    NoRedZoneAttribute = 4194304,
-    NoImplicitFloatAttribute = 8388608,
-    NakedAttribute = 16777216,
-    InlineHintAttribute = 33554432,
-    // 7 << 26
-    StackAttribute = 469762048,
-    ReturnsTwiceAttribute = 536870912,
-    // 1 << 30
-    UWTableAttribute = 1073741824,
-    NonLazyBindAttribute = 2147483648,
+    ZExtAttribute = 1 << 0,
+    SExtAttribute = 1 << 1,
+    NoReturnAttribute = 1 << 2,
+    InRegAttribute = 1 << 3,
+    StructRetAttribute = 1 << 4,
+    NoUnwindAttribute = 1 << 5,
+    NoAliasAttribute = 1 << 6,
+    ByValAttribute = 1 << 7,
+    NestAttribute = 1 << 8,
+    ReadNoneAttribute = 1 << 9,
+    ReadOnlyAttribute = 1 << 10,
+    NoInlineAttribute = 1 << 11,
+    AlwaysInlineAttribute = 1 << 12,
+    OptimizeForSizeAttribute = 1 << 13,
+    StackProtectAttribute = 1 << 14,
+    StackProtectReqAttribute = 1 << 15,
+    AlignmentAttribute = 31 << 16,
+    NoCaptureAttribute = 1 << 21,
+    NoRedZoneAttribute = 1 << 22,
+    NoImplicitFloatAttribute = 1 << 23,
+    NakedAttribute = 1 << 24,
+    InlineHintAttribute = 1 << 25,
+    StackAttribute = 7 << 26,
+    ReturnsTwiceAttribute = 1 << 29,
+    UWTableAttribute = 1 << 30,
+    NonLazyBindAttribute = 1 << 31,
+
+    // Not added to LLVM yet, so may need to stay updated if LLVM changes.
+    FixedStackSegment = 1 << 41,
 }
 
 // enum for the LLVM IntPredicate type
@@ -274,9 +274,7 @@ pub mod llvm {
     #[abi = "cdecl"]
     pub extern {
         /* Create and destroy contexts. */
-        #[fast_ffi]
         pub unsafe fn LLVMContextCreate() -> ContextRef;
-        #[fast_ffi]
         pub unsafe fn LLVMContextDispose(C: ContextRef);
         #[fast_ffi]
         pub unsafe fn LLVMGetMDKindIDInContext(C: ContextRef,
@@ -285,13 +283,11 @@ pub mod llvm {
                                         -> c_uint;
 
         /* Create and destroy modules. */
-        #[fast_ffi]
         pub unsafe fn LLVMModuleCreateWithNameInContext(ModuleID: *c_char,
                                                     C: ContextRef)
                                                  -> ModuleRef;
         #[fast_ffi]
         pub unsafe fn LLVMGetModuleContext(M: ModuleRef) -> ContextRef;
-        #[fast_ffi]
         pub unsafe fn LLVMDisposeModule(M: ModuleRef);
 
         /** Data layout. See Module::getDataLayout. */
@@ -307,7 +303,6 @@ pub mod llvm {
         pub unsafe fn LLVMSetTarget(M: ModuleRef, Triple: *c_char);
 
         /** See Module::dump. */
-        #[fast_ffi]
         pub unsafe fn LLVMDumpModule(M: ModuleRef);
 
         /** See Module::setModuleInlineAsm. */
@@ -1589,7 +1584,8 @@ pub mod llvm {
                                          Op: AtomicBinOp,
                                          LHS: ValueRef,
                                          RHS: ValueRef,
-                                         Order: AtomicOrdering)
+                                         Order: AtomicOrdering,
+                                         SingleThreaded: Bool)
                                          -> ValueRef;
 
         /* Selected entries from the downcasts. */
@@ -1597,7 +1593,6 @@ pub mod llvm {
         pub unsafe fn LLVMIsATerminatorInst(Inst: ValueRef) -> ValueRef;
 
         /** Writes a module to the specified path. Returns 0 on success. */
-        #[fast_ffi]
         pub unsafe fn LLVMWriteBitcodeToFile(M: ModuleRef,
                                              Path: *c_char) -> c_int;
 
@@ -1647,40 +1642,30 @@ pub mod llvm {
         pub unsafe fn LLVMDisposeTargetData(TD: TargetDataRef);
 
         /** Creates a pass manager. */
-        #[fast_ffi]
         pub unsafe fn LLVMCreatePassManager() -> PassManagerRef;
         /** Creates a function-by-function pass manager */
-        #[fast_ffi]
         pub unsafe fn LLVMCreateFunctionPassManagerForModule(M:ModuleRef) -> PassManagerRef;
 
         /** Disposes a pass manager. */
-        #[fast_ffi]
         pub unsafe fn LLVMDisposePassManager(PM: PassManagerRef);
 
         /** Runs a pass manager on a module. */
-        #[fast_ffi]
         pub unsafe fn LLVMRunPassManager(PM: PassManagerRef,
                                          M: ModuleRef) -> Bool;
 
         /** Runs the function passes on the provided function. */
-        #[fast_ffi]
         pub unsafe fn LLVMRunFunctionPassManager(FPM:PassManagerRef, F:ValueRef) -> Bool;
 
         /** Initializes all the function passes scheduled in the manager */
-        #[fast_ffi]
         pub unsafe fn LLVMInitializeFunctionPassManager(FPM:PassManagerRef) -> Bool;
 
         /** Finalizes all the function passes scheduled in the manager */
-        #[fast_ffi]
         pub unsafe fn LLVMFinalizeFunctionPassManager(FPM:PassManagerRef) -> Bool;
 
-        #[fast_ffi]
         pub unsafe fn LLVMInitializePasses();
 
-        #[fast_ffi]
         pub unsafe fn LLVMAddPass(PM:PassManagerRef,P:PassRef);
 
-        #[fast_ffi]
         pub unsafe fn LLVMCreatePass(PassName:*c_char) -> PassRef;
 
         #[fast_ffi]
@@ -1762,9 +1747,7 @@ pub mod llvm {
         #[fast_ffi]
         pub unsafe fn LLVMAddBasicAliasAnalysisPass(PM: PassManagerRef);
 
-        #[fast_ffi]
         pub unsafe fn LLVMPassManagerBuilderCreate() -> PassManagerBuilderRef;
-        #[fast_ffi]
         pub unsafe fn LLVMPassManagerBuilderDispose(PMB:
                                                     PassManagerBuilderRef);
         #[fast_ffi]
@@ -1801,11 +1784,9 @@ pub mod llvm {
         /* Stuff that's in rustllvm/ because it's not upstream yet. */
 
         /** Opens an object file. */
-        #[fast_ffi]
         pub unsafe fn LLVMCreateObjectFile(MemBuf: MemoryBufferRef)
                                         -> ObjectFileRef;
         /** Closes an object file. */
-        #[fast_ffi]
         pub unsafe fn LLVMDisposeObjectFile(ObjFile: ObjectFileRef);
 
         /** Enumerates the sections in an object file. */
@@ -1813,7 +1794,7 @@ pub mod llvm {
         pub unsafe fn LLVMGetSections(ObjFile: ObjectFileRef)
                                    -> SectionIteratorRef;
         /** Destroys a section iterator. */
-        #[fast_ffi]
+
         pub unsafe fn LLVMDisposeSectionIterator(SI: SectionIteratorRef);
         /** Returns true if the section iterator is at the end of the section
             list: */
@@ -1842,7 +1823,6 @@ pub mod llvm {
                 Path: *c_char)
              -> MemoryBufferRef;
 
-        #[fast_ffi]
         pub unsafe fn LLVMRustWriteOutputFile(PM: PassManagerRef,
                                               M: ModuleRef,
                                               Triple: *c_char,
@@ -1893,11 +1873,9 @@ pub mod llvm {
                                                  Output: *c_char);
 
         /** Turn on LLVM pass-timing. */
-        #[fast_ffi]
         pub unsafe fn LLVMRustEnableTimePasses();
 
         /// Print the pass timings since static dtors aren't picking them up.
-        #[fast_ffi]
         pub unsafe fn LLVMRustPrintPassTimings();
 
         #[fast_ffi]
@@ -2115,6 +2093,15 @@ pub fn ConstICmp(Pred: IntPredicate, V1: ValueRef, V2: ValueRef) -> ValueRef {
 pub fn ConstFCmp(Pred: RealPredicate, V1: ValueRef, V2: ValueRef) -> ValueRef {
     unsafe {
         llvm::LLVMConstFCmp(Pred as c_ushort, V1, V2)
+    }
+}
+
+pub fn SetFunctionAttribute(Fn: ValueRef, attr: Attribute) {
+    unsafe {
+        let attr = attr as u64;
+        let lower = attr & 0xffffffff;
+        let upper = (attr >> 32) & 0xffffffff;
+        llvm::LLVMAddFunctionAttr(Fn, lower as c_uint, upper as c_uint);
     }
 }
 /* Memory-managed object interface to type handles. */
